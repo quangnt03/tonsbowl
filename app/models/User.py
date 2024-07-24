@@ -5,7 +5,7 @@ from fastapi.exceptions import HTTPException
 from app import constants
 from app.db import user_collection
 
-class User(BaseModel):
+class UserModel(BaseModel):
     telegram_id: str
     sp: int = 0
     ticket: int = 0
@@ -37,7 +37,7 @@ def add_user(telegram_id: str):
             detail="User is already registered"
         )
 
-    added_user = User(
+    added_user = UserModel(
         telegram_id=telegram_id,
         sp=10,
         ticket=1,
@@ -55,7 +55,7 @@ def add_user(telegram_id: str):
 
     return added_user
 
-def check_in(telegram_id) -> User:
+def check_in(telegram_id) -> UserModel:
     existing_user = find_by_telegram(telegram_id) or None
 
     if existing_user == None:
@@ -95,7 +95,7 @@ def check_in(telegram_id) -> User:
     }, update={
         "$set": updated_user
     })
-    return  User(**updated_user)
+    return  UserModel(**updated_user)
 
 def play(telegram_id: str, score: int): 
     existing_user = find_by_telegram(telegram_id) or None
@@ -127,6 +127,6 @@ def play(telegram_id: str, score: int):
         "$set": existing_user
     })
 
-    updated_user = User(**existing_user)
+    updated_user = UserModel(**existing_user)
 
     return updated_user
