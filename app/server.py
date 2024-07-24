@@ -4,12 +4,22 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 from app.models.Play import Play
-from app.models.User import UserModel, add_user, check_in, play
+from app.models.User import UserModel, add_user, check_in, play, find_by_telegram
 from app.models.Farm import *
 from app.handler.not_found import custom_404_handler
 app = FastAPI()
 
 app.add_exception_handler(StarletteHTTPException, custom_404_handler)
+
+@app.get("/player/:id", status_code=status.HTTP_201_CREATED)
+async def get_player_by_id(id: str) -> UserModel:
+    new_player_response = find_by_telegram(id)
+    if new_player_response == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User#{id} not found'
+        )
+    return new_player_response
 
 @app.post("/player", status_code=status.HTTP_201_CREATED)
 async def new_player(new_player: UserModel) -> UserModel:
