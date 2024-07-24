@@ -4,7 +4,7 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 from app.models.Play import Play
-from app.models.User import UserModel, add_user, check_in, play, find_by_telegram
+from app.models.User import UserModel, UserResponse, add_user, check_in, play, find_by_telegram
 from app.models.Farm import *
 from app.handler.not_found import custom_404_handler
 app = FastAPI()
@@ -12,7 +12,7 @@ app = FastAPI()
 app.add_exception_handler(StarletteHTTPException, custom_404_handler)
 
 @app.get("/player/:id", status_code=status.HTTP_201_CREATED)
-async def get_player_by_id(id: str) -> UserModel:
+async def get_player_by_id(id: str) -> UserResponse:
     new_player_response = find_by_telegram(id)
     if new_player_response == None:
         raise HTTPException(
@@ -22,16 +22,16 @@ async def get_player_by_id(id: str) -> UserModel:
     return new_player_response
 
 @app.post("/player", status_code=status.HTTP_201_CREATED)
-async def new_player(new_player: UserModel) -> UserModel:
+async def new_player(new_player: UserModel) -> UserResponse:
     new_player_response = add_user(new_player.telegram_id)
     return new_player_response
 
 @app.put("/checkin")
-async def check_in_route(player: UserModel) -> UserModel:
+async def check_in_route(player: UserModel) -> UserResponse:
     return check_in(player.telegram_id)
 
 @app.put("/minigame")
-async def play_route(play_stat: Play) -> UserModel:
+async def play_route(play_stat: Play) -> UserResponse:
     return play(play_stat.telegram_id, play_stat.score)
 
 @app.get("/farm")

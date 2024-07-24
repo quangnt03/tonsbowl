@@ -7,10 +7,7 @@ from app.db import user_collection
 
 class UserModel(BaseModel):
     telegram_id: str
-    sp: int = 0
-    ticket: int = 0
-    checkin_streak: int = 0
-    last_checkin: date = str(date.today())
+
 
 class UserResponse(BaseModel):
     sp: int = 0
@@ -61,7 +58,9 @@ def check_in(telegram_id) -> UserModel:
     if existing_user == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail={
+                "message": "User not found"
+            }
         )
     
     last_checkin = date.fromisoformat(existing_user['last_checkin'])
