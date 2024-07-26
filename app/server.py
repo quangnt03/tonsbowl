@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Header
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException 
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
@@ -12,3 +13,7 @@ app = FastAPI()
 app.add_exception_handler(HTTPException, custom_404_handler)
 app.include_router(player.player_router)
 app.include_router(game.game_router)
+
+@app.get("/")
+def health_check():
+    return JSONResponse("Server is online")

@@ -1,6 +1,5 @@
 import os
 import jwt
-from datetime import date, timedelta
 from fastapi.exceptions import HTTPException
 
 SECRET_KEY = os.environ['JWT_SECRET']
@@ -15,7 +14,7 @@ def create_access_token(teleid = str) -> str:
     
     return encoded_jwt
 
-def jwt_decode(token: str) -> dict:
+def decode_jwt(token: str) -> dict:
     try:
         data = jwt.decode(token, key=SECRET_KEY)
     except jwt.exceptions.DecodeError:
