@@ -1,15 +1,13 @@
+from typing import Annotated
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from app import constants
 from app.db import user_collection
 
 class UserModel(BaseModel):
-    telegram_id: str
-
-
-class UserResponse(BaseModel):
+    telegram_id: Annotated[str, Field(exclude=True)]
     sp: int = 0
     ticket: int = 0
     checkin_streak: int = 0
@@ -31,7 +29,7 @@ def add_user(telegram_id: str):
     if is_existing_user(telegram_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User is already registered"
+            detail="UserModel is already registered"
         )
 
     added_user = UserModel(
@@ -59,7 +57,7 @@ def check_in(telegram_id) -> UserModel:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
-                "message": "User not found"
+                "message": "UserModel not found"
             }
         )
     
@@ -102,7 +100,7 @@ def play(telegram_id: str, score: int):
     if existing_user == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="UserModel not found"
         )
     
     if score < 0 or score > 280:

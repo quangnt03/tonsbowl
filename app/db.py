@@ -24,5 +24,7 @@ try:
     print('INFO:', '\t ', 'Connected to database')
 except ConnectionFailure:
     print("Unable to connect database")
+    exit(1)
 except Exception:
     print("Server not available")
+    exit(1)
