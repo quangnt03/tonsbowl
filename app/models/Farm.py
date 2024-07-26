@@ -3,7 +3,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
-from app.models.User import UserModel
+from app.models.User import *
 from app.db import farm_collection, user_collection
 from app import constants
 
@@ -14,7 +14,7 @@ class FarmTurn(BaseModel):
     time_left: timedelta = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds() // 60
 
 def get_farm_turn_by_telegram(telegram_id: str) -> FarmTurn | None:
-    if not UserModel.is_existing_user(telegram_id):
+    if not is_existing_user(telegram_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Undefined player"
