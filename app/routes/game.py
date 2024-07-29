@@ -25,10 +25,14 @@ async def get_farm_info(player: str):
     time_left = (end_time - datetime.now()).total_seconds()
     hours = int(time_left // 3600)
     minutes = int((time_left % 3600) // 60)
+    if minutes < 10:
+        formatted_time = f"{hours}:0{minutes}"
+    else:
+        formatted_time = f"{hours}:{minutes}"
     return {
         "start_time": datetime.fromisoformat(farm_turn["start_time"]),
         "end_time": end_time,
-        "time_left": f"{hours}h{minutes}"
+        "time_left": formatted_time
     }
 
 @game_router.put("/farm")

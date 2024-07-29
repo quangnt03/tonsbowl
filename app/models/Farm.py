@@ -62,13 +62,17 @@ def claim_farm_award(telegram_id: str):
     # Calculate hours and minutes
     hours = int(total_seconds // 3600)
     minutes = int((total_seconds % 3600) // 60)
+    if minutes < 10:
+        formatted_time = f"{hours}:0{minutes}"
+    else:
+        formatted_time = f"{hours}:{minutes}"
 
     if hours > 0 or minutes > 0:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail={
                 "error": "Farming is not yet completed",
-                "time_left":  f"{hours}:{minutes}",
+                "time_left":  formatted_time,
                 "now": datetime.now().isoformat(),
                 "end": end_time,
             }
