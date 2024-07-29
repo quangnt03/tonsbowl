@@ -22,11 +22,13 @@ async def get_farm_info(player: str):
             detail={ "message": "User has not started farming" }
         )
     end_time = datetime.fromisoformat(farm_turn["end_time"])
-    time_left = (end_time - datetime.now()).total_seconds() // 60
+    time_left = (end_time - datetime.now()).total_seconds()
+    hours = int(time_left // 3600)
+    minutes = int((time_left % 3600) // 60)
     return {
         "start_time": datetime.fromisoformat(farm_turn["start_time"]),
         "end_time": end_time,
-        "time_left": time_left
+        "time_left": f"{hours}h{minutes}"
     }
 
 @game_router.put("/farm")
