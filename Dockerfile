@@ -9,9 +9,8 @@ COPY . /usr/src
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
 # Expose port 80 for the app
 EXPOSE 80
 
 # Run uvicorn server with the specified application
-ENTRYPOINT ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "80", "--reload"]

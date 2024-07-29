@@ -13,24 +13,21 @@ class FarmTurn(BaseModel):
     end_time: datetime = (datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
     time_left: timedelta = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds() // 60
 
-def get_farm_turn_by_telegram(telegram_id: str) -> FarmTurn | None:
+class FarmTurnIn(BaseModel):
+    telegram_id: Annotated[str, Field(exclude=True)]
+
+def get_farm_turn_by_telegram(telegram_id: str):
     if not is_existing_user(telegram_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Undefined player"
+            detail={ "message": "Undefined player" }
         )
     
     farm_turn = farm_collection.find_one({
         "telegram_id": telegram_id
     }) or None
 
-    if farm_turn == None:
-        return None
-    
-    return FarmTurn(
-        start_time=farm_turn["start_time"],
-        end_time=farm_turn["end_time"]
-    )
+    return farm_turn
 
 def start_farm(telegram_id: str):
     existing_farm = get_farm_turn_by_telegram(telegram_id)
@@ -40,7 +37,7 @@ def start_farm(telegram_id: str):
             detail="Player is already farming"
         )
     
-    new_farm_turn = FarmTurn()
+    new_farm_turn = FarmTurn(telegram_id=telegram_id)
 
     farm_collection.insert_one({
         "telegram_id": telegram_id,
@@ -57,7 +54,11 @@ def claim_farm_award(telegram_id: str):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Player has not started farming"
         )
-    time_left = existing_farm.end_time - datetime.now()
+    end_time = existing_farm['end_time']
+    print(end_time, type(end_time))
+    print(datetime.fromisoformat(end_time))
+    end_time_iso = datetime.fromisoformat(end_time)
+    time_left = end_time_iso - datetime.now()
     total_seconds = time_left.total_seconds()
 
     # Calculate hours and minutes
@@ -68,10 +69,10 @@ def claim_farm_award(telegram_id: str):
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail={
-                "message": "Farming is not yet completed",
+                "error": "Farming is not yet completed",
                 "time_left":  f"{hours}:{minutes}",
                 "now": datetime.now().isoformat(),
-                "end": existing_farm.end_time.isoformat()
+                "end": end_time,
             }
         )
     else:

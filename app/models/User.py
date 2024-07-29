@@ -6,12 +6,15 @@ from fastapi.exceptions import HTTPException
 from app import constants
 from app.db import user_collection
 
+class UserModelIn(BaseModel):
+    telegram_id: Annotated[str, Field(exclude=True)]
+
 class UserModel(BaseModel):
     telegram_id: Annotated[str, Field(exclude=True)]
-    sp: int = 0
-    ticket: int = 0
-    checkin_streak: int = 0
-    last_checkin: date = str(date.today())
+    sp: int 
+    ticket: int 
+    checkin_streak: int 
+    last_checkin: date 
 
 
 def find_by_telegram(telegram_id: str):
@@ -32,23 +35,17 @@ def add_user(telegram_id: str):
             detail="UserModel is already registered"
         )
 
-    added_user = UserModel(
-        telegram_id=telegram_id,
-        sp=10,
-        ticket=1,
-        checkin_streak=1,
-        last_checkin=date.today().isoformat()
-    )
-    
-    user_collection.insert_one({ 
-        "telegram_id": added_user.telegram_id,
+    new_user = {
+        "telegram_id": telegram_id,
         "sp": 10,
         "ticket": 1,
         "checkin_streak": 1,
         "last_checkin": date.today().isoformat()
-     })
+    }
+    
+    user_collection.insert_one(new_user)
 
-    return added_user
+    return UserModel(**new_user)
 
 def check_in(telegram_id) -> UserModel:
     existing_user = find_by_telegram(telegram_id) or None
