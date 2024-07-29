@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from app.models.User import *
 from app.db import farm_collection, user_collection
 from app import constants
+from app.models.User import is_existing_user, find_by_telegram
 
 class FarmTurn(BaseModel):
     telegram_id: Annotated[str, Field(exclude=True)]
@@ -47,43 +48,3 @@ def start_farm(telegram_id: str):
 
     return new_farm_turn
 
-def claim_farm_award(telegram_id: str):
-    existing_farm = get_farm_turn_by_telegram(telegram_id)
-    if existing_farm == None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Player has not started farming"
-        )
-    end_time = existing_farm['end_time']
-    end_time_iso = datetime.fromisoformat(end_time)
-    time_left = end_time_iso - datetime.now()
-    total_seconds = time_left.total_seconds()
-
-    # Calculate hours and minutes
-    hours = int(total_seconds // 3600)
-    minutes = int((total_seconds % 3600) // 60)
-    if minutes < 10:
-        formatted_time = f"{hours}:0{minutes}"
-    else:
-        formatted_time = f"{hours}:{minutes}"
-
-    if hours > 0 or minutes > 0:
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail={
-                "error": "Farming is not yet completed",
-                "time_left":  formatted_time,
-                "now": datetime.now().isoformat(),
-                "end": end_time,
-            }
-        )
-    else:
-        player_stat = user_collection.update_one({
-            "telegram_id": telegram_id
-        }, update={
-            "$inc": {
-                "sp": constants.FARM_AWARD
-            }
-        })
-        farm_collection.delete_one({ "telegram_id": telegram_id })
-        return player_stat

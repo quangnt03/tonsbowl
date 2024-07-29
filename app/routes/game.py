@@ -2,7 +2,12 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
-
+from fastapi import status
+from fastapi.exceptions import HTTPException
+from app.models.User import *
+from app.db import farm_collection, user_collection
+from app import constants
+from app.models.User import find_by_telegram
 from app.models.Play import Play
 from app.models.User import UserModel, play
 from app.models.Farm import *
@@ -41,4 +46,47 @@ async def start_new_farm(farm: FarmTurnIn) -> FarmTurn:
 
 @game_router.put("/farm/claims")
 async def claims_farm(farm: FarmTurnIn):
-    return claim_farm_award(farm.telegram_id)
+    existing_farm = get_farm_turn_by_telegram(farm.telegram_id)
+    if existing_farm == None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Player has not started farming"
+        )
+    end_time = existing_farm['end_time']
+    end_time_iso = datetime.fromisoformat(end_time)
+    time_left = end_time_iso - datetime.now()
+    total_seconds = time_left.total_seconds()
+
+
+    if total_seconds > 0:
+        # Calculate hours and minutes
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        if minutes < 10:
+            formatted_time = f"{hours}:0{minutes}"
+        else:
+            formatted_time = f"{hours}:{minutes}"
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail={
+                "error": "Farming is not yet completed",
+                "time_left":  formatted_time,
+                "now": datetime.now().isoformat(),
+                "end": end_time,
+            }
+        )
+    else:
+        user_collection.update_one({
+            "telegram_id": farm.telegram_id
+        }, update={
+            "$inc": {
+                "sp": constants.FARM_AWARD
+            }
+        })
+        farm_collection.delete_one({ "telegram_id": farm.telegram_id })
+        player_stat = find_by_telegram(farm.telegram_id)
+        return {
+            "sp": player_stat["sp"],
+            "ticket": player_stat["ticket"],
+            "time_left": "0:00"
+        }
