@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
@@ -13,18 +14,20 @@ async def play_route(play_stat: Play) -> UserModel:
     return play(play_stat.telegram_id, play_stat.score)
 
 @game_router.get("/farm/{player}")
-async def get_farm_info(player: str) -> FarmTurn:
+async def get_farm_info(player: str):
     farm_turn = get_farm_turn_by_telegram(player)
     if farm_turn == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={ "message": "User has not started farming" }
         )
-    return FarmTurn(
-        telegram_id=player,
-        start_time=farm_turn["start_time"],
-        end_time=farm_turn["end_time"]
-    )
+    end_time = datetime.fromisoformat(farm_turn["end_time"])
+    time_left = (end_time - datetime.now()).total_seconds() // 60
+    return {
+        "start_time": datetime.fromisoformat(farm_turn["start_time"]),
+        "end_time": end_time,
+        "time_left": time_left
+    }
 
 @game_router.put("/farm")
 async def start_new_farm(farm: FarmTurnIn) -> FarmTurn:

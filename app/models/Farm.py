@@ -11,7 +11,7 @@ class FarmTurn(BaseModel):
     telegram_id: Annotated[str, Field(exclude=True)]
     start_time: datetime = datetime.now().isoformat()
     end_time: datetime = (datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
-    time_left: timedelta = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds() // 60
+
 
 class FarmTurnIn(BaseModel):
     telegram_id: Annotated[str, Field(exclude=True)]
@@ -55,8 +55,6 @@ def claim_farm_award(telegram_id: str):
             detail="Player has not started farming"
         )
     end_time = existing_farm['end_time']
-    print(end_time, type(end_time))
-    print(datetime.fromisoformat(end_time))
     end_time_iso = datetime.fromisoformat(end_time)
     time_left = end_time_iso - datetime.now()
     total_seconds = time_left.total_seconds()
