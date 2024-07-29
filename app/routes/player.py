@@ -4,7 +4,7 @@ from app.models.User import UserModel, add_user, check_in, find_by_telegram
 
 player_router = APIRouter(prefix="/player")
 
-@player_router.get("/:id", status_code=status.HTTP_201_CREATED)
+@player_router.get("/{id}", status_code=status.HTTP_201_CREATED)
 async def get_player_by_id(id: str) -> UserModel:
     player_response = find_by_telegram(id)
     if player_response == None:
