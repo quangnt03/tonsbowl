@@ -16,7 +16,10 @@ async def get_player_by_id(id: str) -> UserModel:
 
 @player_router.post("/", status_code=status.HTTP_201_CREATED)
 async def new_player(new_player: UserModelIn) -> UserModel:
-    new_player_response = add_user(new_player.telegram_id)
+    if new_player.referral:
+        new_player_response = add_user(new_player.telegram_id, new_player.referral)
+    else:
+        new_player_response = add_user(new_player.telegram_id)
     return new_player_response
 
 @player_router.put("/checkin")

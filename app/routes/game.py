@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import APIRouter
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())

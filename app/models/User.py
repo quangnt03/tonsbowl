@@ -1,20 +1,25 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from datetime import date
 from pydantic import BaseModel, Field
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from app import constants
 from app.db import user_collection
+from app.utils import generate_invitation
 
 class UserModelIn(BaseModel):
-    telegram_id: Annotated[str, Field(exclude=True)]
+    telegram_id: str
+    referral: str | None = Field(default=None)
 
 class UserModel(BaseModel):
     telegram_id: Annotated[str, Field(exclude=True)]
     sp: int 
     ticket: int 
     checkin_streak: int 
-    last_checkin: date 
+    last_checkin: date
+    invitation_code: str
+    invitation_link: str
+    referral: str | None = Field(default=None, exclude=True)
 
 
 def find_by_telegram(telegram_id: str):
@@ -23,24 +28,44 @@ def find_by_telegram(telegram_id: str):
     }) or None
     return user
 
+def find_by_referral(referral_code: str):
+    referral_user = user_collection.find_one({
+        "invitation_code": referral_code
+    })
+    return referral_user
+
 def is_existing_user(telegram_id: str):
     existing_user = find_by_telegram(telegram_id)
     return existing_user != None
 
-
-def add_user(telegram_id: str):
+def add_user(telegram_id: str, referral: str = None):
     if is_existing_user(telegram_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="UserModel is already registered"
+            detail="Player is already registered"
         )
+    
+    referral_id = None
+    if referral != None:
+        referral_player = find_by_referral(referral)
+        if referral_player == None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Referal Player not found"
+            )
+        referral_id = referral_player['telegram_id']
+
+    invitation_code, invitation_link = generate_invitation.gen_invite_link()
 
     new_user = {
         "telegram_id": telegram_id,
         "sp": 10,
         "ticket": 1,
         "checkin_streak": 1,
-        "last_checkin": date.today().isoformat()
+        "last_checkin": date.today().isoformat(),
+        "invitation_code": invitation_code,
+        "invitation_link": invitation_link,
+        "referral": referral_id
     }
     
     user_collection.insert_one(new_user)
@@ -54,7 +79,7 @@ def check_in(telegram_id) -> UserModel:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
-                "message": "UserModel not found"
+                "message": "User not found"
             }
         )
     
@@ -97,7 +122,7 @@ def play(telegram_id: str, score: int):
     if existing_user == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="UserModel not found"
+            detail="User not found"
         )
     
     if score < 0 or score > 280:
