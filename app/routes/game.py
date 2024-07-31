@@ -16,7 +16,7 @@ game_router = APIRouter(prefix="/game")
 
 @game_router.put("/minigame")
 async def play_route(play_stat: Play) -> UserModel:
-    return play(play_stat.telegram_id, play_stat.score)
+    return play(play_stat.id, play_stat.score)
 
 @game_router.get("/farm/{player}")
 async def get_farm_info(player: str):
@@ -42,11 +42,11 @@ async def get_farm_info(player: str):
 
 @game_router.put("/farm")
 async def start_new_farm(farm: FarmTurnIn) -> FarmTurn:
-    return start_farm(farm.telegram_id)
+    return start_farm(farm.id)
 
 @game_router.put("/farm/claims")
-async def claims_farm(farm: FarmTurnIn):
-    existing_farm = get_farm_turn_by_telegram(farm.telegram_id)
+async def claims_farm(farm: FarmTurnIn): 
+    existing_farm = get_farm_turn_by_telegram(farm.id)
     if existing_farm == None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -77,14 +77,14 @@ async def claims_farm(farm: FarmTurnIn):
         )
     else:
         user_collection.update_one({
-            "telegram_id": farm.telegram_id
+            "id": farm.id
         }, update={
             "$inc": {
                 "sp": constants.FARM_AWARD
             }
         })
-        farm_collection.delete_one({ "telegram_id": farm.telegram_id })
-        player_stat = find_by_telegram(farm.telegram_id)
+        farm_collection.delete_one({ "id": farm.id })
+        player_stat = find_by_telegram(farm.id)
         return {
             "sp": player_stat["sp"],
             "ticket": player_stat["ticket"],

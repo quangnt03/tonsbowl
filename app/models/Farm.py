@@ -9,39 +9,39 @@ from app import constants
 from app.models.User import is_existing_user, find_by_telegram
 
 class FarmTurn(BaseModel):
-    telegram_id: Annotated[str, Field(exclude=True)]
+    id: Annotated[str, Field(exclude=True)]
     start_time: datetime = datetime.now().isoformat()
     end_time: datetime = (datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
 
 
 class FarmTurnIn(BaseModel):
-    telegram_id: Annotated[str, Field(exclude=True)]
+    id: Annotated[str, Field(exclude=True)]
 
-def get_farm_turn_by_telegram(telegram_id: str):
-    if not is_existing_user(telegram_id):
+def get_farm_turn_by_telegram(id: str):
+    if not is_existing_user(id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={ "message": "Undefined player" }
         )
     
     farm_turn = farm_collection.find_one({
-        "telegram_id": telegram_id
+        "id": id
     }) or None
 
     return farm_turn
 
-def start_farm(telegram_id: str):
-    existing_farm = get_farm_turn_by_telegram(telegram_id)
+def start_farm(id: str):
+    existing_farm = get_farm_turn_by_telegram(id)
     if existing_farm != None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Player is already farming"
         )
     
-    new_farm_turn = FarmTurn(telegram_id=telegram_id)
+    new_farm_turn = FarmTurn(id=id)
 
     farm_collection.insert_one({
-        "telegram_id": telegram_id,
+        "id": id,
         "start_time": new_farm_turn.start_time,
         "end_time": new_farm_turn.end_time,
     })

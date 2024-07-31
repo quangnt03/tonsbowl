@@ -8,23 +8,26 @@ from app.db import user_collection
 from app.utils import generate_invitation
 
 class UserModelIn(BaseModel):
-    telegram_id: str
+    id: str
     referral: str | None = Field(default=None)
 
 class UserModel(BaseModel):
-    telegram_id: Annotated[str, Field(exclude=True)]
+    id: Annotated[str, Field(exclude=True)]
+    first_name: str = ""
+    last_name: str = ""
+    username: str = ""
     sp: int 
     ticket: int 
     checkin_streak: int 
-    last_checkin: date
+    last_checkin: str
     invitation_code: str
     invitation_link: str
     referral: str | None = Field(default=None, exclude=True)
 
 
-def find_by_telegram(telegram_id: str):
+def find_by_telegram(id: str):
     user = user_collection.find_one({
-        'telegram_id': telegram_id
+        'id': id
     }) or None
     return user
 
@@ -34,46 +37,12 @@ def find_by_referral(referral_code: str):
     })
     return referral_user
 
-def is_existing_user(telegram_id: str):
-    existing_user = find_by_telegram(telegram_id)
+def is_existing_user(id: str):
+    existing_user = find_by_telegram(id)
     return existing_user != None
 
-def add_user(telegram_id: str, referral: str = None):
-    if is_existing_user(telegram_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Player is already registered"
-        )
-    
-    referral_id = None
-    if referral != None:
-        referral_player = find_by_referral(referral)
-        if referral_player == None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Referal Player not found"
-            )
-        referral_id = referral_player['telegram_id']
-
-    invitation_code, invitation_link = generate_invitation.gen_invite_link()
-
-    new_user = {
-        "telegram_id": telegram_id,
-        "sp": 10,
-        "ticket": 1,
-        "checkin_streak": 1,
-        "last_checkin": date.today().isoformat(),
-        "invitation_code": invitation_code,
-        "invitation_link": invitation_link,
-        "referral": referral_id
-    }
-    
-    user_collection.insert_one(new_user)
-
-    return UserModel(**new_user)
-
-def check_in(telegram_id) -> UserModel:
-    existing_user = find_by_telegram(telegram_id) or None
+def check_in(id) -> UserModel:
+    existing_user = find_by_telegram(id) or None
 
     if existing_user == None:
         raise HTTPException(
@@ -102,7 +71,7 @@ def check_in(telegram_id) -> UserModel:
     ticket = existing_user['ticket'] + constants.DEFAULT_TICKET + (cal_streak - 1) * constants.BASE_INCREMENT_TICKET
 
     updated_user = { 
-        "telegram_id": telegram_id,
+        "id": id,
         "sp": sp,
         "ticket": ticket,
         "checkin_streak": streak,
@@ -110,14 +79,36 @@ def check_in(telegram_id) -> UserModel:
     }
 
     user_collection.update_one(filter={
-        "telegram_id": telegram_id 
+        "id": id 
     }, update={
         "$set": updated_user
     })
     return  UserModel(**updated_user)
 
-def play(telegram_id: str, score: int): 
-    existing_user = find_by_telegram(telegram_id) or None
+def add_user(user: dict, referral_player: str = None):
+    invitation_code, invitation_link = generate_invitation.gen_invite_link()
+
+    new_player = {
+        "id": user['id'],
+        "first_name": user['first_name'],
+        "last_name": user['last_name'],
+        "username": user['username'],
+        "sp": 0,
+        "ticket": 1,
+        "checkin_streak": 1,
+        "last_checkin": date.today().isoformat(),
+        "invitation_code": invitation_code,
+        "invitation_link": invitation_link,
+        "referral": referral_player
+    }
+    
+    user_collection.insert_one(new_player)
+    del new_player["_id"]
+    
+    return new_player
+
+def play(id: str, score: int): 
+    existing_user = find_by_telegram(id) or None
 
     if existing_user == None:
         raise HTTPException(
@@ -141,7 +132,7 @@ def play(telegram_id: str, score: int):
     existing_user['ticket'] -= 1
 
     user_collection.update_one(filter={
-        "telegram_id": telegram_id 
+        "id": id 
     }, update={
         "$set": existing_user
     })
