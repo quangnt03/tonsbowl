@@ -15,13 +15,13 @@ from app.controller.Farm import *
 
 game_router = APIRouter(prefix="/game")
 
-@game_router.put("/minigame")
+@game_router.post("/minigame")
 async def play_route(play_stat: Play) -> UserModel:
     return play(play_stat.telegram_code, play_stat.score)
 
-@game_router.get("/farm/{player}")
-async def get_farm_info(player: str):
-    farm_turn = get_farm_turn_by_telegram(player)
+@game_router.post("/farm")
+async def get_farm_info(player: FarmTurnIn):
+    farm_turn = get_farm_turn_by_telegram(player.telegram_code)
     if farm_turn == None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
