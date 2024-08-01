@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 class Play(BaseModel):
-    telegram_id: str
-    score: int = 0
+    telegram_code: str
+    score: float = 0
