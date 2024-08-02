@@ -68,9 +68,9 @@ async def get_friends(player: UserModelInID):
     )
 
 @player_router.post("/info", status_code=status.HTTP_200_OK)
-async def get_player_by_id(player: UserModelInID) -> UserModel:
-    player_response = find_by_telegram(player.telegram_code)
-    if player_response == None:
+async def get_player_by_id(player: UserModelInID) -> UserModelInfo:
+    player_info = find_by_telegram(player.telegram_code)
+    if player_info == None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={
@@ -78,10 +78,10 @@ async def get_player_by_id(player: UserModelInID) -> UserModel:
                 "message": 'User not found'
             }
         )
-    return player_response
+    return UserModelInfo(**player_info)
 
 @player_router.post("/checkin")
-async def check_in_route(player: UserModelInID) -> UserModel:
+async def check_in_route(player: UserModelInID):
     return check_in(player.telegram_code)
 
 @player_router.post('/friendbonus')

@@ -1,11 +1,11 @@
 from datetime import date
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from app import constants
+from app.data import constants
 from app.db import user_collection, referral_collection
 from app.models.User import UserModel
 from app.utils import generate_invitation
-from app.constants import *
+from app.data.constants import *
 from app.handler.exceptions import *
 
 def find_by_telegram(telegram_code: str):
@@ -98,7 +98,7 @@ def check_in(telegram_code) -> UserModel:
     }, update={
         "$set": updated_user
     })
-    return  UserModel(**updated_user)
+    return updated_user
 
 def add_user(user: dict, referral_player: str = None):
     invitation_code, invitation_link = generate_invitation.gen_invite_link()

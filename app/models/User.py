@@ -20,3 +20,7 @@ class UserModel(BaseModel):
     invitation_code: str
     invitation_link: str
     referral: str | None = Field(default=None, exclude=True)
+
+class UserModelInfo(BaseModel):
+    sp: float
+    ticket: int 
