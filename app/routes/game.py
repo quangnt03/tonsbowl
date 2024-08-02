@@ -10,13 +10,14 @@ from app.data.constants import *
 from app.models.Play import Play
 from app.models.User import UserModel
 from app.models.Farm import *
-from app.controller.User import *
+from app.controller.User import find_by_telegram,play
 from app.controller.Farm import *
+from app.controller.Referral import referral_gain
 
 game_router = APIRouter(prefix="/game")
 
 @game_router.post("/minigame")
-async def play_route(play_stat: Play) -> UserModel:
+async def play_route(play_stat: Play) -> UserModelInfo:
     return play(play_stat.telegram_code, play_stat.score)
 
 @game_router.post("/farm")
@@ -91,48 +92,10 @@ async def claims_farm(farm: FarmTurnIn):
                 "sp": constants.FARM_AWARD
             }
         })
-        first_referral_award = constants.FIRST_REFERRAL_SHARE * constants.FARM_AWARD
-        second_referral_award = constants.SECOND_REFERRAL_SHARE * constants.FARM_AWARD
+        
         player_stat = find_by_telegram(farm.telegram_code)
-        referral = player_stat['referral']
-        if referral != None:
-            user_collection.update_one(
-                filter={ "telegram_code": referral },
-                update={
-                    "$inc": {
-                        "sp": first_referral_award
-                    }
-                }
-            )
-            referral_collection.update_one(
-                filter={
-                    "referrer": referral,
-                    "referree": farm.telegram_code,
-                },
-                update={
-                    "$inc": { "sp": first_referral_award }
-                }
-            )
-            first_referral = find_by_telegram(referral)
-            second_referral = first_referral['referral']
-            if second_referral != None:
-                user_collection.update_one(
-                    filter={ "telegram_code": second_referral },
-                    update={
-                        "$inc": {
-                            "sp": second_referral_award
-                        }
-                    }
-                )
-                referral_collection.update_one(
-                    filter={
-                        "referrer": second_referral,
-                        "referree": farm.telegram_code,
-                    },
-                    update={
-                        "$inc": { "sp": second_referral_award }
-                    }
-                )
+        referral_gain(player_stat, constants.FARM_AWARD)
+        
         farm_collection.delete_one({ "telegram_code": farm.telegram_code })
         return {
             "status_code": 200,

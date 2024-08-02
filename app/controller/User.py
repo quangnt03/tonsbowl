@@ -14,6 +14,7 @@ def find_by_telegram(telegram_code: str):
     }, {'_id': False}) or None
     return user
 
+from app.controller.Referral import referral_gain
 def find_by_referral(referral_code: str):
     referral_user = user_collection.find_one({
         "invitation_code": referral_code
@@ -108,7 +109,7 @@ def add_user(user: dict, referral_player: str = None):
         "first_name": user['first_name'],
         "last_name": user['last_name'],
         "username": user['username'],
-        "sp": 10,
+        "sp": 10.0,
         "ticket": 1,
         "checkin_streak": 1,
         "last_checkin": date.today().isoformat(),
@@ -124,13 +125,6 @@ def add_user(user: dict, referral_player: str = None):
             "referree": user['telegram_code'],
             "sp": 0,
         })
-        referrer = find_by_telegram(referral_player)
-        if referrer['referral'] != None:
-            referral_collection.insert_one({
-                "referrer": referrer['referral'],
-                "referree": user['telegram_code'],
-                "sp": 0
-            })  
     del new_player['_id']
     return {
         "status_code": 200,
@@ -166,49 +160,9 @@ def play(telegram_code: str, score: int):
     }, update={
         "$set": existing_user
     })
+    player_stat = find_by_telegram(telegram_code)
+    referral_gain(player_stat, score)
 
-    first_referral_award = FIRST_REFERRAL_SHARE * score
-    second_referral_award = SECOND_REFERRAL_SHARE * score
-    referral = existing_user['referral']
-    if referral != None:
-        user_collection.update_one(
-            filter={ "telegram_code": referral },
-            update={
-                "$inc": {
-                    "sp": first_referral_award
-                }
-            }
-        )
-        referral_collection.update_one(
-            filter={
-                "referrer": referral,
-                "referree": telegram_code,
-            },
-            update={
-                "$inc": { "sp": first_referral_award }
-            }
-        )
-        first_referral = find_by_telegram(referral)
-        second_referral = first_referral['referral']
-        if second_referral != None:
-            user_collection.update_one(
-                filter={ "telegram_code": second_referral },
-                update={
-                    "$inc": {
-                        "sp": second_referral_award
-                    }
-                }
-            )
-            referral_collection.update_one(
-                filter={
-                    "referrer": second_referral,
-                    "referree": telegram_code,
-                },
-                update={
-                    "$inc": { "sp": second_referral_award }
-                }
-            )
-
-    updated_user = UserModel(**existing_user)
+    updated_user = UserModel(**player_stat)
 
     return updated_user
