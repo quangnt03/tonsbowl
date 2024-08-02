@@ -13,8 +13,7 @@ player_router = APIRouter(prefix="/player")
 @player_router.post("",
     status_code=status.HTTP_200_OK,
 )
-async def new_player(init_data: InitData):
-    print(init_data)
+async def get_player_info_from_init_data(init_data: InitData):
     try:
         data = safe_parse_webapp_init_data(
             init_data=init_data.query,
