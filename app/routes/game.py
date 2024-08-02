@@ -6,7 +6,7 @@ load_dotenv(find_dotenv())
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from app.db import farm_collection, user_collection
-from app.constants import *
+from app.data.constants import *
 from app.models.Play import Play
 from app.models.User import UserModel
 from app.models.Farm import *

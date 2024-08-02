@@ -2,7 +2,7 @@ from typing import Annotated
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
 from app.models.User import *
-from app import constants
+from app.data import constants
 
 class FarmTurn(BaseModel):
     telegram_code: Annotated[str, Field(exclude=True)]
