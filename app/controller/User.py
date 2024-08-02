@@ -1,6 +1,5 @@
 from datetime import date
 from fastapi import status
-from fastapi.exceptions import HTTPException
 from app.data import constants
 from app.db import user_collection, referral_collection
 from app.models.User import UserModel
@@ -135,21 +134,18 @@ def play(telegram_code: str, score: int):
     existing_user = find_by_telegram(telegram_code) or None
 
     if existing_user == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+        raise InvalidBodyException(
+            detail={ "message": "User not found" }
         )
     
     if score < 0 or score > 280:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid awarding stat"
+        raise InvalidBodyException(
+            detail={ "message": "Invalid awarding stats" }
         )
 
     if existing_user['ticket'] < 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Insufficient ticket to play"
+        raise InvalidBodyException(
+            detail={ "message": "Invalid awarding stats" }
         )
     
     existing_user['sp'] += score
