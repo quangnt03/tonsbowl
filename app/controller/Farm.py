@@ -1,5 +1,3 @@
-from fastapi import status
-from fastapi.exceptions import HTTPException
 from app.models.User import *
 from app.db import farm_collection
 from .User import is_existing_user

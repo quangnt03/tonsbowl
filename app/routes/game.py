@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 from fastapi import status
-from fastapi.exceptions import HTTPException
 from app.db import farm_collection, user_collection
 from app.data.constants import *
 from app.models.Play import Play
@@ -24,10 +23,8 @@ async def play_route(play_stat: Play) -> UserModelInfo:
 async def get_farm_info(player: FarmTurnIn):
     farm_turn = get_farm_turn_by_telegram(player.telegram_code)
     if farm_turn == None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise InvalidBodyException(
             detail={ 
-                "status_code": 400,
                 "message": "User has not started farming"
             }
         )
