@@ -159,6 +159,6 @@ def play(telegram_code: str, score: int):
     player_stat = find_by_telegram(telegram_code)
     referral_gain(player_stat, score)
 
-    updated_user = UserModel(**player_stat)
+    updated_user = UserModel(**existing_user)
 
     return updated_user
