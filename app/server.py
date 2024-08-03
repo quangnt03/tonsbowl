@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException 
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
@@ -9,6 +10,14 @@ from app.routes import game, player, gatcha
 from app.handler.not_found import custom_404_handler
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_exception_handler(HTTPException, custom_404_handler)
 app.include_router(player.player_router)
