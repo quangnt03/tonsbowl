@@ -25,7 +25,7 @@ async def get_player_info_from_init_data(init_data: InitData):
         existing_user_in_db = find_by_telegram(user["telegram_code"])
         if existing_user_in_db == None:
             referral_player = None
-            if len(init_data.command.strip()) > 0 and init_data.command != "null":
+            if len(init_data.command != "null" and init_data.command != None):
                 referral = init_data.command
                 referral_player = find_by_referral(init_data.command)
             else:
