@@ -1,6 +1,6 @@
 import secrets
 
-BASE_LINK = "https://t.me/tonbowl_bot/tonbowls/?startapp=ref_"
+BASE_LINK = "https://t.me/tonbowl_bot/tonbowls?start=ref_"
 
 def gen_invite_link():
     invitation_code = secrets.token_hex(4)
