@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.models.User import *
 from app.db import farm_collection
 from .User import is_existing_user
@@ -24,6 +25,7 @@ def start_farm(telegram_code: str):
     farm_collection.insert_one({
         "telegram_code": telegram_code,
         "start_time": new_farm_turn.start_time,
+        "now": datetime.now().isoformat(),
         "end_time": new_farm_turn.end_time,
     })
 

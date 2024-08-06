@@ -83,11 +83,13 @@ def check_in(telegram_code) -> UserModel:
         cal_streak = constants.MAX_STREAK 
 
     sp = existing_user['sp'] + cal_streak * constants.BASE_INCREMENT_SP
+    accumulated_sp = existing_user['accumulated_sp'] + cal_streak * constants.BASE_INCREMENT_SP
     ticket = existing_user['ticket'] + constants.DEFAULT_TICKET + (cal_streak - 1) * constants.BASE_INCREMENT_TICKET
 
     updated_user = { 
         "telegram_code": telegram_code,
         "sp": sp,
+        "accumulated_sp": accumulated_sp,
         "ticket": ticket,
         "checkin_streak": streak,
         "last_checkin": date.today().isoformat()
@@ -109,12 +111,15 @@ def add_user(user: dict, referral_player: str = None):
         "last_name": user['last_name'],
         "username": user['username'],
         "sp": 10.0,
+        "accumulated_sp": 10.0,
         "ticket": 1,
         "checkin_streak": 1,
         "last_checkin": date.today().isoformat(),
         "invitation_code": invitation_code,
         "invitation_link": invitation_link,
-        "referral": referral_player
+        "invitation_turn": 1,
+        "referral": referral_player,
+        "milestone": 0,
     }
     user_collection.insert_one(new_player)
 
@@ -124,13 +129,51 @@ def add_user(user: dict, referral_player: str = None):
             "referree": user['telegram_code'],
             "sp": 0,
         })
+        user_collection.update_one({
+            "telegram_code": referral_player
+        }, {
+            "$inc": {
+                "invitation_turn": -1
+            }
+        })
     del new_player['_id']
     return {
         "status_code": 200,
         **new_player
     }
 
-def play(telegram_code: str, score: int): 
+def gain_sp(telegram_code: str, score: int):
+    user_collection.update_one(filter={
+        "telegram_code": telegram_code 
+    }, update={
+        "$inc": {
+            'sp': score,
+            'accumulated_sp': score
+        }
+    })
+    player_stat = find_by_telegram(telegram_code)
+    referral_gain(player_stat, score)
+    return player_stat
+
+def start_play(telegram_code: str): 
+    existing_user = find_by_telegram(telegram_code) or None
+
+    if existing_user['ticket'] < 1:
+        raise InvalidBodyException(
+            detail={ "message": "Not enough ticket" }
+        )
+    
+    existing_user['ticket'] -= 1
+
+    user_collection.update_one(filter={
+        "telegram_code": telegram_code 
+    }, update={
+        "$set": existing_user
+    })
+
+    return existing_user["ticket"]
+
+def play_reward(telegram_code: str, score: int): 
     existing_user = find_by_telegram(telegram_code) or None
 
     if existing_user == None:
@@ -143,22 +186,6 @@ def play(telegram_code: str, score: int):
             detail={ "message": "Invalid awarding stats" }
         )
 
-    if existing_user['ticket'] < 1:
-        raise InvalidBodyException(
-            detail={ "message": "Invalid awarding stats" }
-        )
+    player_stat = gain_sp(telegram_code, score)
     
-    existing_user['sp'] += score
-    existing_user['ticket'] -= 1
-
-    user_collection.update_one(filter={
-        "telegram_code": telegram_code 
-    }, update={
-        "$set": existing_user
-    })
-    player_stat = find_by_telegram(telegram_code)
-    referral_gain(player_stat, score)
-
-    updated_user = UserModel(**existing_user)
-
-    return updated_user
+    return player_stat
