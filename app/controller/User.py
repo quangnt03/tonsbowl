@@ -110,39 +110,37 @@ def add_user(user: dict, referral_player: str = None):
         "first_name": user['first_name'],
         "last_name": user['last_name'],
         "username": user['username'],
-        "sp": 10.0,
-        "accumulated_sp": 10.0,
-        "ticket": 1,
-        "checkin_streak": 1,
-        "last_checkin": date.today().isoformat(),
         "invitation_code": invitation_code,
         "invitation_link": invitation_link,
-        "invitation_turn": 1,
         "referral": referral_player,
-        "milestone": 0,
+        **DEFAULT_STATS
     }
     user_collection.insert_one(new_player)
 
     if referral_player != None:
-        referral_collection.insert_one({
-            "referrer": referral_player,
-            "referree": user['telegram_code'],
-            "sp": 0,
-        })
-        user_collection.update_one({
-            "telegram_code": referral_player
-        }, {
-            "$inc": {
-                "invitation_turn": -1
-            }
-        })
+        add_referral(referral_player, user["telegram_code"])
+
     del new_player['_id']
     return {
         "status_code": 200,
         **new_player
     }
 
-def gain_sp(telegram_code: str, score: int):
+def add_referral(referral, referree):
+    referral_collection.insert_one({
+        "referrer": referral,
+        "referree": referree,
+        "sp": 0,
+    })
+    user_collection.update_one({
+        "telegram_code": referral
+    }, {
+        "$inc": {
+            "invitation_turn": -1
+        }
+    })
+
+def gain_sp(telegram_code: str, score: int, can_referral_gain: bool = False):
     user_collection.update_one(filter={
         "telegram_code": telegram_code 
     }, update={
@@ -152,7 +150,8 @@ def gain_sp(telegram_code: str, score: int):
         }
     })
     player_stat = find_by_telegram(telegram_code)
-    referral_gain(player_stat, score)
+    if can_referral_gain:
+        referral_gain(player_stat, score)
     return player_stat
 
 def start_play(telegram_code: str): 
@@ -186,6 +185,6 @@ def play_reward(telegram_code: str, score: int):
             detail={ "message": "Invalid awarding stats" }
         )
 
-    player_stat = gain_sp(telegram_code, score)
+    player_stat = gain_sp(telegram_code, score, can_referral_gain=True)
     
     return player_stat

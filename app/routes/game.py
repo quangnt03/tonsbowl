@@ -11,7 +11,6 @@ from app.models.User import UserModelInID
 from app.models.Farm import *
 from app.controller.User import *
 from app.controller.Farm import *
-from app.controller.Referral import referral_gain
 
 game_router = APIRouter(prefix="")
 
@@ -75,7 +74,7 @@ async def claims_farm(farm: FarmTurnIn):
             }
         )
     else:
-        player_stat = gain_sp(farm.telegram_code, FARM_DURATION)
+        player_stat = gain_sp(farm.telegram_code, FARM_AWARD, can_referral_gain=True)
 
         farm_collection.delete_one({ "telegram_code": farm.telegram_code })
         return {

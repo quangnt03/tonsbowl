@@ -1,10 +1,16 @@
+from datetime import date
+
 BASE_INCREMENT_SP=10
 BASE_INCREMENT_TICKET=2
 MAX_STREAK=7
-DEFAULT={
-    "sp": 10,
+DEFAULT_STATS={
+    "sp": 10.0,
+    "accumulated_sp": 10.0,
     "ticket": 1,
-    "milestone": 0
+    "checkin_streak": 1,
+    "last_checkin": date.today().isoformat(),
+    "invitation_turn": 1,
+    "milestone": 0,
 }
 FARM_DURATION=8
 FARM_AWARD=200

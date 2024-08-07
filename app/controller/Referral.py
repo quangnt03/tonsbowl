@@ -15,8 +15,7 @@ def referral_gain(player_stat: dict, sp: float):
             },
             update={
                 "$inc": { 
-                    "sp": first_referral_award,
-                    "accumulated_sp": first_referral_award
+                    "sp": first_referral_award
                 }
             }
         )
