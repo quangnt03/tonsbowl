@@ -22,15 +22,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def health_check():
+    return JSONResponse("Server is online", status_code=200)
+
 app.add_exception_handler(HTTPException, custom_404_handler)
 app.include_router(player.player_router)
 app.include_router(game.game_router)
 app.include_router(gatcha.gatcha_router)
 app.include_router(friend.friend_router)
-
-@app.get("/")
-def health_check():
-    return JSONResponse("Server is online")
 
 if os.getenv("ENV") == "dev":
     @app.post("/gain")
