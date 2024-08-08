@@ -74,7 +74,7 @@ async def claims_farm(farm: FarmTurnIn):
             }
         )
     else:
-        player_stat = gain_sp(farm.telegram_code, FARM_AWARD, can_referral_gain=True)
+        player_stat = gain_sp(farm.telegram_code, FARM_AWARD, can_referral_gain=True, update_acc_sp=True)
 
         farm_collection.delete_one({ "telegram_code": farm.telegram_code })
         return {
