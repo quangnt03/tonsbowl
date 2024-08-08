@@ -39,12 +39,13 @@ async def get_player_info_from_init_data(init_data: InitData):
                         "message": "Referral player not found"
                     }
                 )
-            if referral_player != None and referral_player["invitation_turn"] <= 0:
+            if referral_player != None \
+                and (referral_player["invitation_turn"] <= 0 \
+                    and referral_player["invitation_turn"] != constants.UNLIMITED):
                 raise InvalidBodyException(detail={
                     "message": "Referral player has no invitation turn"
                 })
-            referral_player_id = referral_player['telegram_code'] if referral_player != None else None
-            new_player = add_user(user, referral_player_id)
+            new_player = add_user(user, referral_player)
             player = new_player
         else:
             player = existing_user_in_db
