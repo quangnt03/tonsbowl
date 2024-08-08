@@ -6,8 +6,9 @@ from app.data import constants
 
 class FarmTurn(BaseModel):
     telegram_code: Annotated[str, Field(exclude=True)]
-    start_time: datetime = datetime.now().isoformat()
-    end_time: datetime = (datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
+    start_time: str
+    now: str = datetime.now().isoformat()
+    end_time: str
 
 
 class FarmTurnIn(BaseModel):

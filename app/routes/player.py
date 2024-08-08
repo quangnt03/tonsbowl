@@ -14,6 +14,7 @@ player_router = APIRouter(prefix="/player")
     status_code=status.HTTP_200_OK,
 )
 async def get_player_info_from_init_data(init_data: InitData):
+    player = None
     try:
         data = safe_parse_webapp_init_data(
             init_data=init_data.query,
@@ -38,13 +39,19 @@ async def get_player_info_from_init_data(init_data: InitData):
                         "message": "Referral player not found"
                     }
                 )
-            referral_player_id = referral_player['telegram_code'] if referral_player != None else None
-            new_player = add_user(user, referral_player_id)
-            return new_player
+            if referral_player != None \
+                and (referral_player["invitation_turn"] <= 0 \
+                    and referral_player["invitation_turn"] != constants.UNLIMITED):
+                raise InvalidBodyException(detail={
+                    "message": "Referral player has no invitation turn"
+                })
+            new_player = add_user(user, referral_player)
+            player = new_player
         else:
-            return existing_user_in_db
+            player = existing_user_in_db
+        return player
 
-    except ValueError:
+    except ValueError as e:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
@@ -52,20 +59,6 @@ async def get_player_info_from_init_data(init_data: InitData):
                 "message": "Invalid init data"
             }
         )
-
-# @player_router.post("/friends")
-# async def get_friends(player: UserModelInID):
-#     player_response = find_by_telegram(player.telegram_code)
-#     if player_response == None:
-#         raise NotFoundException(detail={
-#             "message": "Unknown Player"
-#         })
-#     friends_list = get_all_referred_player(player.telegram_code)
-
-#     return JSONResponse(
-#         status_code=status.HTTP_200_OK,
-#         content=friends_list
-#     )
 
 @player_router.post("/info", status_code=status.HTTP_200_OK)
 async def get_player_by_id(player: UserModelInID) -> UserModelInfo:
@@ -83,15 +76,3 @@ async def get_player_by_id(player: UserModelInID) -> UserModelInfo:
 @player_router.post("/checkin")
 async def check_in_route(player: UserModelInID):
     return check_in(player.telegram_code)
-
-@player_router.post('/friend')
-async def friend_bonus(player: UserModelInID):
-    existing_user = find_by_telegram(player.telegram_code)
-    if existing_user == None:
-        raise NotFoundException(detail={
-            "message": "Player not found"
-        })
-    friend_bonus = get_friend_bonus(player.telegram_code)
-    return JSONResponse(
-        content=friend_bonus
-    )

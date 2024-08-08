@@ -59,10 +59,11 @@ def gatcha_rolling(player: UserModelInID):
     }, update={
         "$inc": { "sp": -1 * GATCHA_REQUIRED_SP }
     })
-
+    user = find_by_telegram(player.telegram_code)
     return {
         "status_code": "200",
-        "item_id": gatcha_drop_item["id"]
+        "item_id": gatcha_drop_item["id"],
+        "sp": user['sp']
     }
 
 @gatcha_router.post('/inventory')

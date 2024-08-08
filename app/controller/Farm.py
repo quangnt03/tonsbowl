@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
 from app.models.User import *
 from app.db import farm_collection
 from .User import is_existing_user
 from app.models.Farm import FarmTurn
 from app.handler.exceptions import *
+from app.data import constants
 
 def get_farm_turn_by_telegram(telegram_code: str):
     if not is_existing_user(telegram_code):
@@ -19,7 +21,11 @@ def start_farm(telegram_code: str):
     if existing_farm != None:
         raise InvalidBodyException(detail={ "message": "Player is already farming" })
 
-    new_farm_turn = FarmTurn(telegram_code=telegram_code)
+    new_farm_turn = FarmTurn(
+        telegram_code=telegram_code,
+        start_time = datetime.now().isoformat(),
+        end_time=(datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
+    )
 
     farm_collection.insert_one({
         "telegram_code": telegram_code,
