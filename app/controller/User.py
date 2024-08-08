@@ -187,6 +187,7 @@ def gain_sp(telegram_code: str, score: int, can_referral_gain: bool = False, upd
                 'accumulated_sp': score
             }
         })
+        up_milestone(telegram_code)
     player = find_by_telegram(telegram_code)
     if can_referral_gain:
         referral_gain(player, score)
