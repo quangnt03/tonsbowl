@@ -21,13 +21,17 @@ def start_farm(telegram_code: str):
     if existing_farm != None:
         raise InvalidBodyException(detail={ "message": "Player is already farming" })
 
-    new_farm_turn = {
-        "telegram_code":telegram_code,
-        "start_time": datetime.now().isoformat(),
-        "end_time":(datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
-    }
+    new_farm_turn = FarmTurn(
+        telegram_code=telegram_code,
+        start_time = datetime.now().isoformat(),
+        end_time=(datetime.now() + timedelta(hours=constants.FARM_DURATION)).isoformat() 
+    )
 
-    farm_collection.insert_one(new_farm_turn.copy())
+    farm_collection.insert_one({
+        "telegram_code": telegram_code,
+        "start_time": new_farm_turn.start_time,
+        "end_time": new_farm_turn.end_time,
+    })
 
     return new_farm_turn
 

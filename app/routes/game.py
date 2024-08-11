@@ -35,21 +35,17 @@ async def get_farm_info(player: FarmTurnIn):
                 "message": "User has not started farming"
             }
         )
-    
+    end_time = datetime.fromisoformat(farm_turn["end_time"])
     return {
         "status_code": 200,
         "start_time": datetime.fromisoformat(farm_turn["start_time"]),
-        "end_time": datetime.fromisoformat(farm_turn["end_time"]),
         "now": datetime.now().isoformat(),
+        "end_time": end_time
     }
 
 @game_router.post("/farm/start")
-async def start_new_farm(farm: FarmTurnIn):
-    farm_info = start_farm(farm.telegram_code)
-    return {
-        **farm_info,
-        "now": datetime.now().isoformat(),
-    }
+async def start_new_farm(farm: FarmTurnIn) -> FarmTurn:
+    return start_farm(farm.telegram_code)
 
 @game_router.post("/farm/claim")
 async def claims_farm(farm: FarmTurnIn): 
