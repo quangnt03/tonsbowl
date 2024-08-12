@@ -49,7 +49,11 @@ async def get_player_info_from_init_data(init_data: InitData):
             player = new_player
         else:
             player = existing_user_in_db
-        return player
+        return {
+            "status_code": status.HTTP_200_OK,
+            **player,
+            "today": date.today().isoformat()
+        }
 
     except ValueError as e:
         return JSONResponse(

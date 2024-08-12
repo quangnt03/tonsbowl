@@ -18,6 +18,7 @@ async def list_friend(player: UserModelInID):
     return JSONResponse(
         content={
             "sp": existing_user["sp"],
+            "accumulated_sp": existing_user["accumulated_sp"],
             "milestone": existing_user["milestone"],
             "invitation_turn": existing_user["invitation_turn"],
             "friends": friends

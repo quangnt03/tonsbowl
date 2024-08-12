@@ -41,7 +41,9 @@ def check_in(telegram_code) -> UserModel:
     day_diff = (today - last_checkin).days
     if day_diff == 0:
         raise InvalidBodyException(detail={
-            "message": "Just checked in today"
+            "message": "Just checked in today",
+            "today": today.isoformat(),
+            "last_checkin": existing_user['last_checkin']
         })
     
     streak = 1
@@ -67,7 +69,10 @@ def check_in(telegram_code) -> UserModel:
     })
 
     updated_user = gain_sp(telegram_code, sp, update_acc_sp=False)
-    return updated_user
+    return {
+        **updated_user,
+        "today": date.today().isoformat() 
+    }
 
 def add_user(user: dict, referral_player: dict | None = None):
     invitation_code, invitation_link = generate_invitation.gen_invite_link()
@@ -88,10 +93,7 @@ def add_user(user: dict, referral_player: dict | None = None):
         add_referral(referral_player["telegram_code"], user)
 
     del new_player['_id']
-    return {
-        "status_code": 200,
-        **new_player
-    }
+    return new_player
 
 def start_play(telegram_code: str): 
     existing_user = find_by_telegram(telegram_code) or None
@@ -167,6 +169,7 @@ def claim_referral(telegram_id: str):
     return {
         "bonus": total_bonus,
         "sp": update_user['sp'],
+        "accumulated_sp": update_user['accumulated_sp'],
         "milestone": update_user['milestone'],
         "invitation_turn": update_user["invitation_turn"]
     }
