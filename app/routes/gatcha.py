@@ -59,15 +59,15 @@ def gatcha_rolling(player: UserModelInID):
     }, update={
         "$inc": { "sp": -1 * GATCHA_REQUIRED_SP }
     })
-    user = find_by_telegram(player.telegram_code)
+    new_sp = existing_player['sp'] - GATCHA_REQUIRED_SP 
     return {
         "status_code": "200",
         "item_id": gatcha_drop_item["id"],
-        "sp": user['sp']
+        "sp": new_sp
     }
 
 @gatcha_router.post('/inventory')
-def gatcha_rolling(player: UserModelInID):
+def get_inventory(player: UserModelInID):
     existing_player = find_by_telegram(player.telegram_code)
     if existing_player == None:
         raise InvalidBodyException({

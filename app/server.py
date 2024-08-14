@@ -52,10 +52,10 @@ if os.getenv("ENV") == "dev":
     @app.post("/remove")
     def remove_player(player: UserModelInID):
         user_collection.delete_one({ "telegram_code": player.telegram_code })
-        referral_collection.delete_one({ "referrer": player.telegram_code })
         farm_collection.delete_one({ "telegram_code": player.telegram_code })
         inventory_collection.delete_one({ "telegram_code": player.telegram_code })
-        
+        referral_collection.delete_one({ "referrer": player.telegram_code })
+
         return {
             "telegram_code": player.telegram_code,
             "deleted": True
