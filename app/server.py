@@ -7,8 +7,8 @@ from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
 from app.routes import game, player, gatcha, friend
-from app.models.User import UserModelIncreaseForDebug
-from app.db import user_collection
+from app.models.User import UserModelIncreaseForDebug, UserModelInID
+from app.db import user_collection, referral_collection, farm_collection, inventory_collection
 from app.controller.User import find_by_telegram
 from app.handler.not_found import custom_404_handler
 
@@ -48,4 +48,16 @@ if os.getenv("ENV") == "dev":
         })
         user = find_by_telegram(player.telegram_code)
         return user
+        
+    @app.post("/remove")
+    def remove_player(player: UserModelInID):
+        user_collection.delete_one({ "telegram_code": player.telegram_code })
+        referral_collection.delete_one({ "referrer": player.telegram_code })
+        farm_collection.delete_one({ "telegram_code": player.telegram_code })
+        inventory_collection.delete_one({ "telegram_code": player.telegram_code })
+        
+        return {
+            "telegram_code": player.telegram_code,
+            "deleted": True
+        }
         
