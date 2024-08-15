@@ -15,7 +15,7 @@ DEFAULT_STATS={
     "milestone": 0,
     "raffle_ticket": 0,
 }
-FARM_DURATION=1/30 if os.getenv("ENV") == "dev" else 8
+FARM_DURATION=8
 FARM_AWARD=200
 FIRST_REFERRAL_SHARE=0.1
 SECOND_REFERRAL_SHARE=0.05
