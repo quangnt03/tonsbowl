@@ -8,7 +8,7 @@ MAX_STREAK=7
 DEFAULT_STATS={
     "sp": 10.0,
     "accumulated_sp": 0,
-    "ticket": 5,
+    "ticket": 6,
     "checkin_streak": 1,
     "last_checkin": date.today().isoformat(),
     "invitation_turn": 1,
