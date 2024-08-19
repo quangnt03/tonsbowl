@@ -98,12 +98,12 @@ def add_user(user: dict, referral_player: dict | None = None):
 def start_play(telegram_code: str): 
     existing_user = find_by_telegram(telegram_code) or None
 
-    if existing_user['ticket'] < 5:
+    if existing_user['ticket'] < 1:
         raise InvalidBodyException(
             detail={ "message": "Not enough ticket" }
         )
     
-    existing_user['ticket'] -= 5
+    existing_user['ticket'] -= 1
 
     user_collection.update_one(filter={
         "telegram_code": telegram_code 
