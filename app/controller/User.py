@@ -56,7 +56,7 @@ def check_in(telegram_code) -> UserModel:
         cal_streak = constants.MAX_STREAK 
 
     sp = cal_streak * constants.BASE_INCREMENT_SP
-    ticket = existing_user['ticket'] + (cal_streak - 1) * constants.BASE_INCREMENT_TICKET
+    ticket = 5 + (cal_streak - 1) * constants.BASE_INCREMENT_TICKET
 
     user_collection.update_one(filter={
         "telegram_code": telegram_code 
