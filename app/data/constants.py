@@ -11,7 +11,7 @@ DEFAULT_STATS={
     "ticket": 6,
     "checkin_streak": 1,
     "last_checkin": date.today().isoformat(),
-    "invitation_turn": 1,
+    "invitation_turn": 10,
     "milestone": 0,
     "raffle_ticket": 0,
 }
