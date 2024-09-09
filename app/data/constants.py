@@ -5,6 +5,12 @@ UNLIMITED="unlimited"
 BASE_INCREMENT_SP=10
 BASE_INCREMENT_TICKET=2
 MAX_STREAK=7
+QUEST_LIMIT=6
+FARM_DURATION=8
+FARM_AWARD=200
+FIRST_REFERRAL_SHARE=0.1
+SECOND_REFERRAL_SHARE=0.05
+GATCHA_REQUIRED_SP=500
 DEFAULT_STATS={
     "sp": 10.0,
     "accumulated_sp": 0,
@@ -14,12 +20,8 @@ DEFAULT_STATS={
     "invitation_turn": 10,
     "milestone": 0,
     "raffle_ticket": 0,
+    "quests": [False] * QUEST_LIMIT
 }
-FARM_DURATION=8
-FARM_AWARD=200
-FIRST_REFERRAL_SHARE=0.1
-SECOND_REFERRAL_SHARE=0.05
-GATCHA_REQUIRED_SP=500
 MILESTONE=[
     {"sp": 0, "invite_codes": 0, "raffle_ticket": 0},
     {"sp": 1000, "invite_codes": 1, "raffle_ticket": 0},

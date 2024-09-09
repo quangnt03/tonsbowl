@@ -40,3 +40,6 @@ class UserModelIncreaseForDebug(BaseModel):
     milestone: int = 0
     invitation_turn: int = 0
     
+
+class UserQuest(UserModelInID):
+    quest_id: int

@@ -7,7 +7,7 @@ from app.handler.exceptions import *
 from app.data.gatcha_items import GATCHA_ITEMS
 from app.data.constants import *
 
-gatcha_router = APIRouter(prefix="/gatcha")
+gatcha_router = APIRouter(prefix="/gatcha", tags=["Gatcha"])
 
 @gatcha_router.post('')
 def gatcha_rolling(player: UserModelInID):

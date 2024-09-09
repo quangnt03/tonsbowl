@@ -22,6 +22,7 @@ services:
       ME_CONFIG_BASICAUTH: false
   myapp:
     build: .
+    restart: always
     expose:
       - 80
     ports:
@@ -30,3 +31,4 @@ services:
       - .env
     volumes:
       - ./:/usr/src/
+    

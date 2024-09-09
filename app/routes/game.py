@@ -12,7 +12,7 @@ from app.models.Farm import *
 from app.controller.User import *
 from app.controller.Farm import *
 
-game_router = APIRouter(prefix="")
+game_router = APIRouter(prefix="", tags=["Minigame"])
 
 @game_router.post("/minigame/start")
 async def start_game(play_stat: UserModelInID):

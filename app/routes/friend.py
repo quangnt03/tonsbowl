@@ -5,7 +5,7 @@ from app.models.User import *
 from app.controller.User import *
 from app.handler.exceptions import *
 
-friend_router = APIRouter(prefix="/friend")
+friend_router = APIRouter(prefix="/friend", tags=["Friends and Referrals"])
 
 @friend_router.post('')
 async def list_friend(player: UserModelInID):

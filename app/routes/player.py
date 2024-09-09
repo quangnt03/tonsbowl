@@ -8,7 +8,7 @@ from app.models.Query import InitData
 from app.controller.User import *
 from app.handler.exceptions import *
 
-player_router = APIRouter(prefix="/player")
+player_router = APIRouter(prefix="/player", tags=["Player"])
 
 @player_router.post("",
     status_code=status.HTTP_200_OK,

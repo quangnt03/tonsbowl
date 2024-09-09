@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
-from app.routes import game, player, gatcha, friend
+from app.routes import game, player, gatcha, friend, quest
 from app.models.User import UserModelIncreaseForDebug, UserModelInID
 from app.db import user_collection, referral_collection, farm_collection, inventory_collection
 from app.controller.User import find_by_telegram
@@ -28,6 +28,7 @@ def health_check():
 
 app.add_exception_handler(HTTPException, custom_404_handler)
 app.include_router(player.player_router)
+app.include_router(quest.quest_router)
 app.include_router(game.game_router)
 app.include_router(gatcha.gatcha_router)
 app.include_router(friend.friend_router)
